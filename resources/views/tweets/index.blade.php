@@ -5,7 +5,7 @@
         @foreach ($tweets as $tweet)
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    {{ $tweet->salutation }}
+                    <a href="{{ route('tweets.show', $tweet) }}">{{ $tweet->salutation }}</a>
                 </div>
                 <div class="panel-body">
                     {{ $tweet->tweet }}

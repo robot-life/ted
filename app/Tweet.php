@@ -9,4 +9,9 @@ class Tweet extends Model
     protected $fillable = [
         'rating',
     ];
+
+    public function getJsonAttribute($value)
+    {
+        return json_decode($value);
+    }
 }
