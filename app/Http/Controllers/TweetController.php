@@ -71,7 +71,9 @@ class TweetController extends Controller
      */
     public function update(Request $request, Tweet $tweet)
     {
-        //
+        $tweet->rating = $request->rating;
+        $tweet->save();
+        return response(null, 204);
     }
 
     /**
