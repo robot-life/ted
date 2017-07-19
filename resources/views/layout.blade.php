@@ -31,9 +31,36 @@
         <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
         <script src="https://twemoji.maxcdn.com/2/twemoji.min.js?2.3.0"></script>
+        <script src="/js/Autolinker.min.js"></script>
         <script>
             window.onload = function() {
                 twemoji.parse(document.body);
+
+                var autolinker = new Autolinker( {
+                    urls : {
+                        schemeMatches : true,
+                        wwwMatches    : true,
+                        tldMatches    : true
+                    },
+                    email       : false,
+                    phone       : false,
+                    mention     : 'twitter',
+                    hashtag     : 'twitter',
+
+                    stripPrefix : false,
+                    stripTrailingSlash : true,
+                    newWindow   : true,
+
+                    truncate : {
+                        length   : 0,
+                        location : 'end'
+                    },
+
+                    className : ''
+                } );
+
+                var myTextEl = document.body;
+                myTextEl.innerHTML = autolinker.link( myTextEl.innerHTML );
             }
         </script>
 
