@@ -1,13 +1,13 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use App\Parser;
+use App\Lexers\Regex;
 
-class ParserTest extends TestCase
+class RegexTest extends TestCase
 {
     public function test_instantiates_object()
     {
-        $this->assertInstanceOf(Parser::class, new Parser);
+        $this->assertInstanceOf(Regex::class, new Regex);
     }
 
     public function saluteDataProvider()
@@ -89,7 +89,7 @@ class ParserTest extends TestCase
      */
     public function test_returns_salutation($statement, $expected)
     {
-        $actual = (new Parser)->parse($statement);
+        $actual = (new Regex)->lex($statement);
 
         $this->assertSame($expected, $actual);
     }

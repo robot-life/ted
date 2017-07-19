@@ -3,6 +3,10 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\Parser;
+use App\Repositories\MySqlDb;
+use App\Filters\Retweet;
+use App\Lexers\Regex;
 
 class parse extends Command
 {
@@ -37,6 +41,10 @@ class parse extends Command
      */
     public function handle()
     {
-        //
+        $parcy = new Parser;
+        $parcy->setRepository(new MySqlDb);
+        $parcy->addFilter(new Retweet);
+        $parcy->addLexer(new Regex);
+        $parcy->parse();
     }
 }
