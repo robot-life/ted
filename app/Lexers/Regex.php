@@ -2,14 +2,18 @@
 
 namespace App\Lexers;
 
+use App\Tweet;
+
 class Regex implements Lexer
 {
     /**
      * @return mixed
      *   substring from input or FALSE on failure
      */
-    public function lex(string $statement)
+    public function lex(Tweet $tweet)
     {
+        $json = $tweet->json;
+        $statement = $json->extended_tweet->full_text ?? $json->text;
         $regex = '/(major|private|general|kernel) \w[\w\-]*/';
         $matches = [];
 

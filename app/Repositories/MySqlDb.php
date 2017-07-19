@@ -51,7 +51,7 @@ class MySqlDb implements Repository
             $data = [
                 'id' => $tweet->id,
                 'tweet_id' => $json->id_str,
-                'tweet' => $json->text,
+                'tweet' => $json->extended_tweet->full_text ?? $json->text,
                 'salutation' => $tweet->salutation,
             ];
 

@@ -2,6 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use App\Lexers\Regex;
+use App\Tweet;
 
 class RegexTest extends TestCase
 {
@@ -89,7 +90,14 @@ class RegexTest extends TestCase
      */
     public function test_returns_salutation($statement, $expected)
     {
-        $actual = (new Regex)->lex($statement);
+        $tweet = new Tweet;
+        $tweet->json = json_encode([
+            'extended_tweet' => [
+                'full_text' => $statement,
+            ],
+        ]);
+
+        $actual = (new Regex)->lex($tweet);
 
         $this->assertSame($expected, $actual);
     }
