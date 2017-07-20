@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Parser;
-use App\Repositories\MySqlDb;
+use App\Repositories\Pdo;
 use App\Filters\Retweet;
 use App\Lexers\Regex;
 
@@ -42,7 +42,7 @@ class parse extends Command
     public function handle()
     {
         $parcy = new Parser;
-        $parcy->setRepository(new MySqlDb);
+        $parcy->setRepository(new Pdo);
         $parcy->addFilter(new Retweet);
         $parcy->addLexer(new Regex);
         $parcy->parse();

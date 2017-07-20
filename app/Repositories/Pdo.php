@@ -7,15 +7,8 @@ use App\Tweet;
 use Illuminate\Database\Eloquent\Collection;
 use Exception;
 
-class MySqlDb implements Repository
+class Pdo implements Repository
 {
-    protected $pdo;
-
-    public function __construct()
-    {
-        $this->pdo = DB::connection()->getPdo();
-    }
-
     public function getNew(int $limit = 0) : Collection
     {
         if ($limit <= 0) {
@@ -37,24 +30,30 @@ class MySqlDb implements Repository
 
     public function patch(Tweet ...$tweets)
     {
-        $sql = "UPDATE tweets
-            SET tweet_id = :tweet_id
-                ,tweet = :tweet
-                ,salutation = :salutation
-            WHERE id = :id
-        ";
+        // all this complexity just so I can reuse a prepared statement
+        $builder = DB::table((new Tweet)->getTable())->where('id', '');
+        $sql = $builder->getGrammar()
+            ->compileUpdate($builder, [
+                'tweet_id' => null,
+                'tweet' => null,
+                'salutation' => null,
+            ]);
 
-        $statement = $this->pdo->prepare($sql);
+        // prepare once
+        $statement = DB::connection()->getPdo()->prepare($sql);
 
         foreach ($tweets as $tweet) {
+            // just call json_decode one time
             $json = $tweet->json;
+
             $data = [
-                'id' => $tweet->id,
-                'tweet_id' => $json->id_str,
-                'tweet' => $json->extended_tweet->full_text ?? $json->text,
-                'salutation' => $tweet->salutation,
+                $json->id_str, // tweet_id
+                $json->extended_tweet->full_text ?? $json->text,
+                $tweet->salutation,
+                $tweet->id, // database id, WHERE statement binders come last
             ];
 
+            // execute many
             $statement->execute($data);
         }
     }
