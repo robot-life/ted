@@ -8,6 +8,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.1/css/bootstrap-slider.min.css" integrity="sha256-qxOBz0Std9dtkon+cnUi5A7HTHO0CLbp9DnkxsJuIXc=" crossorigin="anonymous">
         <style>
             body {
                 font-family: 'Ubuntu', sans-serif;
@@ -16,6 +17,12 @@
                 margin: 0px !important;
                 display: inline !important;
                 height: 32px;
+            }
+            .slider, .rating {
+                float: right;
+            }
+            .rating {
+                margin-right: 15px;
             }
         </style>
 
@@ -61,8 +68,32 @@
 
                 var myTextEl = document.body;
                 myTextEl.innerHTML = autolinker.link( myTextEl.innerHTML );
+
+                $("input.slider").slider();
+                $("input.slider").on("slideStop", function(slideEvt) {
+                    rateTweet(slideEvt.target.dataset.sliderId, slideEvt.value);
+                });
+            }
+
+            function rateTweet(id, rating)
+            {
+                $.ajax({
+                        url: '/tweets/' + id,
+                        method: 'PATCH',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'rating': rating,
+                        },
+                        success: function (data) {
+                            $('#rating-' + id).text(rating);
+                        },
+                        error: function (data) {
+                            console.log(data);
+                        },
+                });
             }
         </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.1/bootstrap-slider.min.js" integrity="sha256-3nkG8q6ajh1K1fHC3hi142DykXlM5TA2xX3OzP/NNJM=" crossorigin="anonymous"></script>
 
         @stack('scripts')
 
