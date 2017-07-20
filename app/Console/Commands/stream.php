@@ -39,7 +39,9 @@ class stream extends Command
      */
     public function handle()
     {
-        $sc = new Streamer(OAUTH_TOKEN, OAUTH_SECRET, Phirehose::METHOD_FILTER);
+        $sc = new Streamer(config('streamer.oauth_token'), config('streamer.oauth_secret'), Phirehose::METHOD_FILTER);
+        $sc->consumerKey = config('streamer.consumer_key');
+        $sc->consumerSecret = config('streamer.consumer_secret');
         $sc->setTrack(config('streamer.track'));
         $sc->setLang(config('streamer.language'));
         $sc->consume();
