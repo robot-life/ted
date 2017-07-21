@@ -45,6 +45,21 @@ class parse extends Command
         $parcy->setRepository(new Pdo);
         $parcy->addFilter(new Retweet);
         $parcy->addLexer(new Regex);
-        $parcy->parse();
+
+        while (true) {
+            $this->line('');
+            $this->info('parsing');
+            $parcy->parse();
+
+            $sleep = 30;
+            $bar = $this->output->createProgressBar($sleep);
+            $this->info('sleeping');
+            while ($sleep--) {
+                $bar->advance();
+                sleep(1);
+            }
+            $bar->finish();
+            sleep(1);
+        }
     }
 }
