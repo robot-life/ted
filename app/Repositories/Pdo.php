@@ -19,7 +19,8 @@ class Pdo implements Repository
             throw new Exception('Repository limit must be greater than zero.');
         }
 
-        return Tweet::select([
+        return Tweet::withoutGlobalScopes()
+            ->select([
                 'id',
                 'json',
             ])
@@ -68,6 +69,8 @@ class Pdo implements Repository
             return;
         }
 
-        return Tweet::whereIn('id', $ids)->delete();
+        return Tweet::withoutGlobalScopes()
+            ->whereIn('id', $ids)
+            ->delete();
     }
 }
