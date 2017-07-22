@@ -9,10 +9,6 @@ class Tweet extends Model
 {
     public $timestamps = false;
 
-    protected $fillable = [
-        'rating',
-    ];
-
     public function getJsonAttribute($value)
     {
         return json_decode($value);
@@ -28,5 +24,10 @@ class Tweet extends Model
                 ->orderBy('id', 'desc')
             ;
         });
+    }
+
+    public function salutations()
+    {
+        return $this->hasMany(Salutation::class);
     }
 }
