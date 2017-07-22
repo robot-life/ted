@@ -46,7 +46,8 @@ class SalutationController extends Controller
      */
     public function show(Salutation $salutation)
     {
-        //
+        $salutation->ratings;
+        return $salutation;
     }
 
     /**

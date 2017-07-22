@@ -11,9 +11,14 @@
 |
 */
 
-Route::get('/', 'TweetController@index');
-Route::resource('tweets', 'TweetController');
-
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+Route::group(['middleware' => ['auth']], function(){
+    Route::get('/', 'TweetController@index');
+
+    Route::get('/home', 'HomeController@index')->name('home');
+
+    Route::resource('tweets', 'TweetController');
+    Route::resource('salutations', 'SalutationController');
+    Route::resource('ratings', 'RatingController');
+});

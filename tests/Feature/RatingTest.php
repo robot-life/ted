@@ -6,41 +6,39 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use App\Tweet;
+use App\Salutation;
 
 class RatingTest extends TestCase
 {
     use DatabaseMigrations;
-    /**
-     * A basic test example.
-     *
-     * @return void
-     */
-    public function test_gets_welcome_page()
-    {
-        $this->get('/')->assertStatus(200);
-    }
 
-    public function test_rates_tweet()
+    public function test_rates_salutation()
     {
-        $tweet = create(Tweet::class);
+        $salutation = create(Salutation::class);
         $data = [
-            'rating' => 8,
+            'rate' => 8,
         ];
 
         $this
-            ->get("/tweets/{$tweet->id}")
+            ->signIn()
+            ->get("/salutations/{$salutation->id}")
             ->assertJsonMissing($data)
         ;
 
         $this
-            ->patch("/tweets/{$tweet->id}", $data)
+            ->post("/ratings", array_merge($data, [
+                'salutation_id' => $salutation->id,
+            ]))
             ->assertStatus(204)
         ;
 
         $this
-            ->get("/tweets/{$tweet->id}")
-            ->assertJson($data)
+            ->get("/salutations/{$salutation->id}")
+            ->assertJson([
+                'ratings' => [
+                    $data,
+                ],
+            ])
         ;
     }
 }

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Rating;
 use Illuminate\Http\Request;
+use App\Salutation;
+use Auth;
 
 class RatingController extends Controller
 {
@@ -35,7 +37,16 @@ class RatingController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $salutation = Salutation::findOrFail($request->salutation_id);
+
+        $rating = new Rating([
+            'rate' => $request->rate,
+        ]);
+        $rating->salutation_id = $salutation->id;
+
+        Auth::user()->ratings()->save($rating);
+
+        return response(null, 204);
     }
 
     /**

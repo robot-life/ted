@@ -91,11 +91,7 @@ class RegexTest extends TestCase
     public function test_returns_salutation($statement, $expected)
     {
         $tweet = new Tweet;
-        $tweet->json = json_encode([
-            'extended_tweet' => [
-                'full_text' => $statement,
-            ],
-        ]);
+        $tweet->tweet = $statement;
 
         $actual = (new Regex)->lex($tweet);
 

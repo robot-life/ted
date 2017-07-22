@@ -32,3 +32,13 @@ $factory->define(App\Tweet::class, function (Faker\Generator $faker) {
         'id' => $tweet_id,
     ];
 });
+
+/** @var \Illuminate\Database\Eloquent\Factory $factory */
+$factory->define(App\Salutation::class, function (Faker\Generator $faker) {
+    return [
+        'tweet_id' => function () {
+            return factory('App\Tweet')->create()->id;
+        },
+        'text' => $faker->sentence,
+    ];
+});
