@@ -6,8 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Salutation extends Model
 {
+    public $timestamps = false;
+
     protected $fillable = [
-        'name',
+        'text',
     ];
 
     public function tweet()

@@ -20,7 +20,7 @@ class Tweet extends Model
 
         static::addGlobalScope('newest', function (Builder $builder) {
             $builder
-                ->whereNotNull('tweet_id')
+                ->whereNotNull('id')
                 ->orderBy('id', 'desc')
             ;
         });

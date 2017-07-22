@@ -14,12 +14,12 @@ class CreateTweetsTable extends Migration
     public function up()
     {
         Schema::create('tweets', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            // this is twitter's ID that we want to reference globally
+            // but can't be primary key because must be null before processing
+            $table->string('id', 22)->unique()->nullable();
+            $table->increments('dbid');
             $table->text('json');
             $table->text('tweet')->nullable();
-            $table->string('tweet_id', 22)->nullable();
-            $table->string('salutation')->nullable();
-            $table->tinyInteger('rating')->nullable();
         });
     }
 

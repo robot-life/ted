@@ -19,25 +19,28 @@ class Pdo implements Repository
             throw new Exception('Repository limit must be greater than zero.');
         }
 
-        return Tweet::withoutGlobalScopes()
+        $tweets = Tweet::withoutGlobalScopes()
             ->select([
-                'id',
+                'dbid',
                 'json',
             ])
-            ->whereNull('tweet_id')
+            ->whereNull('id')
             ->limit($limit)
             ->get();
+
+        $this->process(...$tweets);
+
+        return $tweets;
     }
 
-    public function patch(Tweet ...$tweets)
+    protected function process(Tweet ...$tweets)
     {
         // all this complexity just so I can reuse a prepared statement
-        $builder = DB::table((new Tweet)->getTable())->where('id', '');
+        $builder = DB::table((new Tweet)->getTable())->where('dbid', '');
         $sql = $builder->getGrammar()
             ->compileUpdate($builder, [
-                'tweet_id' => null,
+                'id' => null,
                 'tweet' => null,
-                'salutation' => null,
             ]);
 
         // prepare once
@@ -48,10 +51,9 @@ class Pdo implements Repository
             $json = $tweet->json;
 
             $data = [
-                $json->id_str, // tweet_id
-                $json->extended_tweet->full_text ?? $json->text,
-                $tweet->salutation,
-                $tweet->id, // database id, WHERE statement binders come last
+                $tweet->id = $json->id_str, // tweet_id
+                $tweet->tweet = $json->extended_tweet->full_text ?? $json->text,
+                $tweet->dbid, // local id, WHERE statement binders come last
             ];
 
             // execute many

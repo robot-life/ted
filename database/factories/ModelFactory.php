@@ -25,9 +25,10 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
 
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
 $factory->define(App\Tweet::class, function (Faker\Generator $faker) {
-    static $password;
+    $tweet_id = str_random(22);
 
     return [
-        'json' => json_encode(str_random(13)),
+        'json' => json_encode(['id' => $tweet_id]),
+        'id' => $tweet_id,
     ];
 });

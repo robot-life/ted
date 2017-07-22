@@ -18,12 +18,6 @@
                 display: inline !important;
                 height: 32px;
             }
-            .slider, .rating {
-                float: right;
-            }
-            .rating {
-                margin-right: 15px;
-            }
         </style>
 
         @stack('head')

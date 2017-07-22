@@ -12,12 +12,10 @@ class Regex implements Lexer
      */
     public function lex(Tweet $tweet)
     {
-        $json = $tweet->json;
-        $statement = $json->extended_tweet->full_text ?? $json->text;
         $regex = '/(major|private|general|kernel) \w[\w\-]*/';
         $matches = [];
 
-        if (false == preg_match($regex, $statement, $matches)) {
+        if (false == preg_match($regex, $tweet->tweet, $matches)) {
             return false;
         }
 

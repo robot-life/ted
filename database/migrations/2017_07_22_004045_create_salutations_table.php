@@ -16,9 +16,9 @@ class CreateSalutationsTable extends Migration
         Schema::create('salutations', function (Blueprint $table) {
             $table->increments('id');
 
-            $table->string('name');
+            $table->string('text');
 
-            $table->bigInteger('tweet_id')->unsigned();
+            $table->string('tweet_id', 22);
             $table->foreign('tweet_id')
                 ->references('id')
                 ->on('tweets');

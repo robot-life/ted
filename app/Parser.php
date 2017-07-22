@@ -36,18 +36,15 @@ class Parser
         foreach ($tweets as $index => $tweet) {
             if ($this->filter($tweet)) {
                 $trash []= $tweet;
-                $tweets->forget($index);
                 continue;
             }
 
-            if (!$this->lex($tweet)) {
+            if ($this->lex($tweet) === 0) {
                 $trash []= $tweet;
-                $tweets->forget($index);
             }
         }
 
         $this->repository->delete(...$trash);
-        $this->repository->patch(...$tweets);
     }
 
     protected function filter(Tweet $tweet) : bool
@@ -61,15 +58,19 @@ class Parser
         return false;
     }
 
-    protected function lex(Tweet $tweet) : bool
+    protected function lex(Tweet $tweet) : int
     {
+        $count = 0;
+
         foreach ($this->lexers as $lexer) {
             if (false !== ($response = $lexer->lex($tweet))) {
-                $tweet->salutation = $response;
-                return true;
+                $tweet->salutations()->save(new Salutation([
+                    'text' => $response,
+                ]));
+                $count++;
             }
         }
 
-        return false;
+        return $count;
     }
 }
