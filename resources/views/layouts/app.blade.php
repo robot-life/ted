@@ -121,21 +121,22 @@
 
                 $("input.slider").slider();
                 $("input.slider").on("slideStop", function(slideEvt) {
-                    rateTweet(slideEvt.target.dataset.sliderId, slideEvt.value);
+                    rateSalutation(slideEvt.target.dataset.sliderId, slideEvt.value);
                 });
             }
 
-            function rateTweet(id, rating)
+            function rateSalutation(id, rate)
             {
                 $.ajax({
-                        url: '/tweets/' + id,
-                        method: 'PATCH',
+                        url: '{{ route('ratings.store') }}',
+                        method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
-                            'rating': rating,
+                            'rate': rate,
+                            'salutation_id': id,
                         },
                         success: function (data) {
-                            $('#rating-' + id).text(rating);
+                            $('#rating-' + id).text(rate);
                         },
                         error: function (data) {
                             console.log(data);

@@ -8,6 +8,8 @@ class Rating extends Model
 {
     protected $fillable = [
         'rate',
+        'user_id',
+        'salutation_id',
     ];
 
     public function salutation()

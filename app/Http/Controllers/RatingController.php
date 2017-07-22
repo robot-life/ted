@@ -39,12 +39,12 @@ class RatingController extends Controller
     {
         $salutation = Salutation::findOrFail($request->salutation_id);
 
-        $rating = new Rating([
-            'rate' => $request->rate,
+        $rating = Rating::firstOrNew([
+            'user_id' => Auth::user()->id,
+            'salutation_id' => $salutation->id,
         ]);
-        $rating->salutation_id = $salutation->id;
-
-        Auth::user()->ratings()->save($rating);
+        $rating->rate = $request->rate;
+        $rating->save();
 
         return response(null, 204);
     }
