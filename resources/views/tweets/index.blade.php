@@ -5,7 +5,7 @@
         @foreach ($tweets as $tweet)
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <a href="https://twitter.com/i/web/status/{{ $tweet->tweet_id }}" class="btn btn-default" target="_blank" rel="noopener noreferrer">View</a>
+                    <a href="https://twitter.com/i/web/status/{{ $tweet->id }}" class="btn btn-default" target="_blank" rel="noopener noreferrer">View</a>
                     <a href="{{ route('tweets.show', $tweet) }}" class="btn btn-default" target="_blank">Data</a>
                 </div>
                 <div class="panel-body">
