@@ -9,6 +9,12 @@ use Exception;
 
 class Pdo implements Repository
 {
+    protected $attributes = [
+        'id',
+        'tweet',
+        'text',
+    ];
+
     public function getNew(int $limit = 0) : Collection
     {
         if ($limit <= 0) {
@@ -34,6 +40,34 @@ class Pdo implements Repository
     }
 
     protected function process(Tweet ...$tweets)
+    {
+        // all this complexity just so I can reuse a prepared statement
+        $builder = DB::table((new Tweet)->getTable())->where('dbid', '');
+        $sql = $builder->getGrammar()
+            ->compileUpdate($builder, [
+                'id' => null,
+                'text' => null,
+            ]);
+
+        // prepare once
+        $statement = DB::connection()->getPdo()->prepare($sql);
+
+        foreach ($tweets as $tweet) {
+            // just call json_decode one time
+            $json = $tweet->json;
+
+            $data = [
+                $tweet->id = $json->id_str, // tweet_id
+                $tweet->text = $json->extended_tweet->full_text ?? $json->text,
+                $tweet->dbid, // local id, WHERE statement binders come last
+            ];
+
+            // execute many
+            $statement->execute($data);
+        }
+    }
+
+    public function patch(Tweet ...$tweets)
     {
         // all this complexity just so I can reuse a prepared statement
         $builder = DB::table((new Tweet)->getTable())->where('dbid', '');

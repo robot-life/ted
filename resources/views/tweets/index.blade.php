@@ -9,7 +9,7 @@
                     <a href="{{ route('tweets.show', $tweet) }}" class="btn btn-default" target="_blank">Data</a>
                 </div>
                 <div class="panel-body">
-                    {{ $tweet->tweet }}
+                    {{ $tweet->text }}
                 </div>
                 @foreach ($tweet->salutations as $salutation)
                 <div class="panel-footer">

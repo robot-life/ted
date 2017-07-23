@@ -15,7 +15,7 @@ class Regex implements Lexer
         $regex = '/(major|private|general|kernel) \w[\w\-]*/';
         $matches = [];
 
-        if (false == preg_match($regex, $tweet->tweet, $matches)) {
+        if (false == preg_match($regex, $tweet->text, $matches)) {
             return false;
         }
 

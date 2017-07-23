@@ -19,7 +19,7 @@ class CreateTweetsTable extends Migration
             $table->string('id', 22)->unique()->nullable();
             $table->increments('dbid');
             $table->text('json');
-            $table->text('tweet')->nullable();
+            $table->text('text')->nullable();
         });
     }
 
