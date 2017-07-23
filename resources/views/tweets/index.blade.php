@@ -15,14 +15,22 @@
                 <div class="panel-footer">
                     {{ $salutation->text }}
                     <br>
+                    <?php $rating = null; ?>
+                    @foreach ($salutation->ratings as $rating)
+                        <?php if ($rating->user_id === Auth::user()->id) {
+                            break;
+                        } ?>
+                    @endforeach
                     <input class="slider" type="text"
                         data-slider-id='{{ $salutation->id }}'
                         data-slider-min="0"
                         data-slider-max="100"
                         data-slider-step="1"
-                        data-slider-value="{{ $salutation->rating ?? 50 }}"
+                        data-slider-value="{{ $rating->rate ?? 50 }}"
                     >
-                    <span class="rating" id="rating-{{ $salutation->id }}">{{ $salutation->rating }}</span>
+                    <span class="rating" id="rating-{{ $salutation->id }}">
+                        {{ $rating->rate or '' }}
+                    </span>
                 </div>
                 @endforeach
             </div>

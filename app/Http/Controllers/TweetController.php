@@ -14,7 +14,7 @@ class TweetController extends Controller
      */
     public function index()
     {
-        $tweets = Tweet::with('salutations')->simplePaginate(15);
+        $tweets = Tweet::with('salutations.ratings')->simplePaginate(15);
 
         return view('tweets.index', ['tweets' => $tweets]);
     }
@@ -46,10 +46,9 @@ class TweetController extends Controller
      * @param  \App\Tweet  $tweet
      * @return \Illuminate\Http\Response
      */
-    public function show(Tweet $tweet)
+    public function show($tweet)
     {
-        $tweet->salutations;
-        return $tweet;
+        return Tweet::with('salutations.ratings')->findOrFail($tweet);
     }
 
     /**
