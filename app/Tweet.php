@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Builder;
 class Tweet extends Model
 {
     public $timestamps = false;
+    protected $json;
 
     public function getJsonAttribute($value)
     {
-        return json_decode($value);
+        return $this->json ?? $this->json = json_decode($value);
     }
 
     protected static function boot()
