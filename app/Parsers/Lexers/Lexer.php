@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Lexers;
+namespace App\Parsers\Lexers;
 
 use App\Tweet;
 

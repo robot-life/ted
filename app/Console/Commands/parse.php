@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Parser;
+use App\Processor;
 use App\Repositories\Pdo;
 use App\Filters\Retweet;
 use App\Lexers\Regex;
@@ -41,15 +41,17 @@ class parse extends Command
      */
     public function handle()
     {
-        $parcy = new Parser;
-        $parcy->setRepository(new Pdo);
-        $parcy->addFilter(new Retweet);
-        $parcy->addLexer(new Regex);
+        $repository = new Pdo;
+        $parcy = new Processor;
+
+        $parcy->addParsers(new Retweet, new Regex);
 
         while (true) {
             $this->line('');
             $this->info('parsing');
-            $parcy->parse();
+
+            $tweets = $repository->getNew();
+            $repository->process($parcy, ...$tweets);
 
             $sleep = 30;
             $bar = $this->output->createProgressBar($sleep);

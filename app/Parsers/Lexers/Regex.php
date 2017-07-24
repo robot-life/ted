@@ -1,11 +1,22 @@
 <?php
 
-namespace App\Lexers;
+namespace App\Parsers\Lexers;
 
+use App\Parsers\Parser;
 use App\Tweet;
+use App\Salutation;
 
-class Regex implements Lexer
+class Regex implements Parser, Lexer
 {
+    public function attributes() : array
+    {
+        return [
+            Salutation::class => [
+                'text',
+            ],
+        ];
+    }
+
     /**
      * @return mixed
      *   substring from input or FALSE on failure

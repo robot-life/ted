@@ -11,7 +11,6 @@ class Pdo implements Repository
 {
     protected $attributes = [
         'id',
-        'tweet',
         'text',
     ];
 
@@ -34,12 +33,12 @@ class Pdo implements Repository
             ->limit($limit)
             ->get();
 
-        $this->process(...$tweets);
+        $this->extract(...$tweets);
 
         return $tweets;
     }
 
-    protected function process(Tweet ...$tweets)
+    protected function extract(Tweet ...$tweets)
     {
         // all this complexity just so I can reuse a prepared statement
         $builder = DB::table((new Tweet)->getTable())->where('dbid', '');
@@ -67,31 +66,42 @@ class Pdo implements Repository
         }
     }
 
-    public function patch(Tweet ...$tweets)
+    public function process(Parser $parser, Tweet ...$tweets)
     {
-        // all this complexity just so I can reuse a prepared statement
-        $builder = DB::table((new Tweet)->getTable())->where('dbid', '');
-        $sql = $builder->getGrammar()
-            ->compileUpdate($builder, [
-                'id' => null,
-                'tweet' => null,
-            ]);
+        $trash = [];
 
-        // prepare once
-        $statement = DB::connection()->getPdo()->prepare($sql);
+        foreach ($parser->attributes() as $table => $columns) {
+            // all this complexity just so I can reuse a prepared statement
+            $object = new $table;
+            $id = $object->primaryKey ?? 'id';
+            if ($object instanceof Tweet) {
+                $id = 'dbid';
+            }
+
+            $builder = DB::table($object->getTable())->where($id, '');
+            $sql = $builder->getGrammar()
+                ->compileUpdate($builder, array_flip($columns));
+
+            // prepare once
+            $$table = DB::connection()->getPdo()->prepare($sql);
+        }
 
         foreach ($tweets as $tweet) {
-            // just call json_decode one time
-            $json = $tweet->json;
+            $data = $parser->parse($tweet)
 
-            $data = [
-                $tweet->id = $json->id_str, // tweet_id
-                $tweet->tweet = $json->extended_tweet->full_text ?? $json->text,
-                $tweet->dbid, // local id, WHERE statement binders come last
-            ];
+            if (false === $data) {
+                $trash []= $tweet;
+                continue;
+            }
 
             // execute many
-            $statement->execute($data);
+            foreach ($data as $table => $values) {
+                $$table->execute($values);
+            }
+        }
+
+        if ($trash) {
+            $this->delete(...$trash);
         }
     }
 
