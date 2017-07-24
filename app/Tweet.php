@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Builder;
 class Tweet extends Model
 {
     public $timestamps = false;
+    protected $dates = [
+        'created_at',
+    ];
     protected $json;
 
     public function getJsonAttribute($value)

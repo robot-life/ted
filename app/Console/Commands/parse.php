@@ -3,10 +3,11 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Processor;
+use App\Parsers\Processor;
 use App\Repositories\Pdo;
-use App\Filters\Retweet;
-use App\Lexers\Regex;
+use App\Parsers\Hydrators\Extractor;
+use App\Parsers\Filters\Retweet;
+use App\Parsers\Lexers\Regex;
 
 class parse extends Command
 {
@@ -44,7 +45,9 @@ class parse extends Command
         $repository = new Pdo;
         $parcy = new Processor;
 
-        $parcy->addParsers(new Retweet, new Regex);
+        $parcy->addHydrators(new Extractor);
+        $parcy->addFilters(new Retweet);
+        $parcy->addLexers(new Regex);
 
         while (true) {
             $this->line('');

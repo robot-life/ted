@@ -2,15 +2,10 @@
 
 namespace App\Parsers\Filters;
 
-use App\Parsers\Parser;
 use App\Tweet;
 
-class Retweet implements Parser, Filter
+class Retweet implements Filter
 {
-    public function attributes() : array
-    {
-        return [];
-    }
     /**
      * @return mixed
      *   Returns TRUE if input is filtered.

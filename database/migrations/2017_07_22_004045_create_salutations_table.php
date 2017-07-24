@@ -18,10 +18,12 @@ class CreateSalutationsTable extends Migration
 
             $table->string('text');
 
-            $table->string('tweet_id', 22);
+            $table->bigInteger('tweet_id')->unsigned();
             $table->foreign('tweet_id')
                 ->references('id')
                 ->on('tweets');
+
+            $table->unique('text', 'tweet_id');
         });
     }
 

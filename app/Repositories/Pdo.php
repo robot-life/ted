@@ -4,8 +4,10 @@ namespace App\Repositories;
 
 use DB;
 use App\Tweet;
+use App\Salutation;
 use Illuminate\Database\Eloquent\Collection;
 use Exception;
+use App\Parsers\Processor;
 
 class Pdo implements Repository
 {
@@ -66,37 +68,53 @@ class Pdo implements Repository
         }
     }
 
-    public function process(Parser $parser, Tweet ...$tweets)
+    public function process(Processor $processor, Tweet ...$tweets)
     {
-        $trash = [];
+        // all this complexity just so I can reuse a prepared statement
+        $builder = DB::table((new Tweet)->getTable())->where('dbid', '');
+        $sql = $builder->getGrammar()
+            ->compileUpdate($builder, array_flip($processor->getHydratorAttributes()));
+        // prepare once
+        $updateTweet = DB::connection()->getPdo()->prepare($sql);
 
-        foreach ($parser->attributes() as $table => $columns) {
-            // all this complexity just so I can reuse a prepared statement
-            $object = new $table;
-            $id = $object->primaryKey ?? 'id';
-            if ($object instanceof Tweet) {
-                $id = 'dbid';
+        $builder = DB::table((new Salutation)->getTable());
+        $sql = $builder->getGrammar()
+            ->compileInsert($builder, [
+                'text' => null,
+                'tweet_id' => null,
+            ]);
+        // prepare once
+        $createSalutation = DB::connection()->getPdo()->prepare($sql);
+
+        $trash = [];
+        foreach ($tweets as $tweet) {
+            $hydrated = $processor->hydrate($tweet)
+
+            if ($processor->filter($tweet)) {
+                $trash []= $tweet;
+                continue;
             }
 
-            $builder = DB::table($object->getTable())->where($id, '');
-            $sql = $builder->getGrammar()
-                ->compileUpdate($builder, array_flip($columns));
-
-            // prepare once
-            $$table = DB::connection()->getPdo()->prepare($sql);
-        }
-
-        foreach ($tweets as $tweet) {
-            $data = $parser->parse($tweet)
-
+            $data = $processor->lex($tweet)
             if (false === $data) {
                 $trash []= $tweet;
                 continue;
             }
 
             // execute many
-            foreach ($data as $table => $values) {
-                $$table->execute($values);
+            if ($hydrated) {
+                $updateTweet->execute(array_merge($data, [$tweet->dbid]));
+            }
+            foreach ($data as $values) {
+                try {
+                    $createSalutation->execute(array_merge($values, [$tweet->dbid]));
+                }
+                catch (PDOException $exception) {
+                    // ignore duplicate entries
+                    if ($exception->getCode() != '23000') {
+                        throw $exception;
+                    }
+                }
             }
         }
 

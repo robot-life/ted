@@ -16,9 +16,10 @@ class CreateTweetsTable extends Migration
         Schema::create('tweets', function (Blueprint $table) {
             // this is twitter's ID that we want to reference globally
             // but can't be primary key because must be null before processing
-            $table->string('id', 22)->unique()->nullable();
+            $table->bigInteger('id')->unsigned()->unique()->nullable();
             $table->increments('dbid');
             $table->text('json');
+            $table->dateTimeTz('created_at')->nullable();
             $table->text('text')->nullable();
         });
     }

@@ -1,24 +1,20 @@
 <?php
 
-namespace App;
+namespace App\Parsers;
 
-use App\Parsers\Parser;
 use App\Tweet;
 
 class Processor implements Parser
 {
-    protected $parsers = [];
+    protected $extractors = [];
+    protected $filters = [];
+    protected $lexers = [];
 
-    public function addParsers(Parser ...$parser)
-    {
-
-    }
-
-    public function attributes() : array
+    public function getHydratorAttributes() : array
     {
         $attributes = [];
 
-        foreach ($this->parsers as $parser) {
+        foreach ($this->extractors as $extractor) {
             $attributes = array_merge_recursive($attributes, $parser->attributes());
         }
 

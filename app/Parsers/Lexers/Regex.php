@@ -2,21 +2,11 @@
 
 namespace App\Parsers\Lexers;
 
-use App\Parsers\Parser;
 use App\Tweet;
 use App\Salutation;
 
-class Regex implements Parser, Lexer
+class Regex implements Lexer
 {
-    public function attributes() : array
-    {
-        return [
-            Salutation::class => [
-                'text',
-            ],
-        ];
-    }
-
     /**
      * @return mixed
      *   substring from input or FALSE on failure
