@@ -7,5 +7,9 @@ use App\Tweet;
 interface Hydrator
 {
     public function getAttributes() : array;
-    public function hydrate(Tweet $tweet);
+
+    /**
+     * @return bool Returns TRUE if tweet was hydrated.
+     */
+    public function hydrate(Tweet $tweet) : bool;
 }

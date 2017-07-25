@@ -10,5 +10,5 @@ interface Filter
      * @return bool
      *   Returns TRUE if filter catches tweet, else FALSE.
      */
-    public function catches(Tweet $tweet) : bool;
+    public function filters(Tweet $tweet) : bool;
 }

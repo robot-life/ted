@@ -10,7 +10,7 @@ class Retweet implements Filter
      * @return mixed
      *   Returns TRUE if input is filtered.
      */
-    public function catches(Tweet $tweet) : bool
+    public function filters(Tweet $tweet) : bool
     {
         return isset($tweet->json->retweeted_status);
     }

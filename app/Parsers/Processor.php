@@ -2,42 +2,63 @@
 
 namespace App\Parsers;
 
+use App\Parsers\Hydrators\Hydrator;
+use App\Parsers\Filters\Filter;
+use App\Parsers\Lexers\Lexer;
 use App\Tweet;
 
-class Processor implements Parser
+class Processor implements Hydrator, Filter, Lexer
 {
-    protected $extractors = [];
+    protected $hydrators = [];
     protected $filters = [];
     protected $lexers = [];
 
-    public function getHydratorAttributes() : array
+    public function addHydrators(Hydrator ...$hydrators)
+    {
+        $this->hydrators = array_merge($this->hydrators, $hydrators);
+    }
+
+    public function addFilters(Filter ...$filters)
+    {
+        $this->filters = array_merge($this->filters, $filters);
+    }
+
+    public function addLexers(Lexer ...$lexers)
+    {
+        $this->lexers = array_merge($this->lexers, $lexers);
+    }
+
+    public function getAttributes() : array
     {
         $attributes = [];
 
-        foreach ($this->extractors as $extractor) {
-            $attributes = array_merge_recursive($attributes, $parser->attributes());
+        foreach ($this->hydrators as $hydrator) {
+            $attributes = array_merge_recursive($attributes, $hydrator->getAttributes());
         }
 
         return $attributes;
     }
 
-    public function parse(Tweet $tweet)
+    /**
+     * @return bool Returns TRUE if tweet was hydrated.
+     */
+    public function hydrate(Tweet $tweet) : bool
     {
-        if ($this->filter($tweet)) {
-            return false;
+        $hydrated = false;
+
+        foreach ($this->hydrators as $hydrator) {
+            if ($hydrator->hydrate($tweet)) {
+                $hydrated = true;
+            }
         }
 
-        foreach ($this->lex($tweet) as $result) {
-            $return = array_merge_recursive($return ?? [], $result);
-        }
-
-        return $return ?? false;
+        return $hydrated;
     }
 
-    protected function filter(Tweet $tweet) : bool
+    public function filters(Tweet $tweet) : bool
     {
         foreach ($this->filters as $filter) {
-            if ($filter->catches($tweet)) {
+            if ($filter->filters($tweet)) {
                 return true;
             }
         }
@@ -45,19 +66,14 @@ class Processor implements Parser
         return false;
     }
 
-    protected function lex(Tweet $tweet) : int
+    public function lex(Tweet $tweet)
     {
-        $count = 0;
-
         foreach ($this->lexers as $lexer) {
             if (false !== ($response = $lexer->lex($tweet))) {
-                $tweet->salutations()->save(new Salutation([
-                    'text' => $response,
-                ]));
-                $count++;
+                $results []= $response;
             }
         }
 
-        return $count;
+        return $results ?? false;
     }
 }

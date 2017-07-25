@@ -3,6 +3,7 @@
 namespace App\Parsers\Hydrators;
 
 use App\Tweet;
+use Carbon\Carbon;
 
 class Extractor implements Hydrator
 {
@@ -15,10 +16,14 @@ class Extractor implements Hydrator
         ];
     }
 
-    public function hydrate(Tweet $tweet)
+    /**
+     * @return bool Returns TRUE if tweet was hydrated.
+     */
+    public function hydrate(Tweet $tweet) : bool
     {
         $tweet->id = $tweet->json->id;
         $tweet->text = $tweet->json->extended_tweet->full_text ?? $tweet->json->text;
-        $tweet->created_at = $tweet->json->created_at,
+        $tweet->created_at = new Carbon($tweet->json->created_at);
+        return true;
     }
 }
