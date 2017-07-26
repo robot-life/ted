@@ -11,11 +11,6 @@ use App\Parsers\Processor;
 
 class Pdo implements Repository
 {
-    protected $attributes = [
-        'id',
-        'text',
-    ];
-
     public function getNew(int $limit = 0) : Collection
     {
         if ($limit === 0) {
@@ -71,20 +66,29 @@ class Pdo implements Repository
                 $trash []= $tweet;
                 continue;
             }
-            dd($data);
 
             // execute many
             if ($hydrated) {
-                $updateTweet->execute(array_merge($data, [$tweet->dbid]));
+                $attributes = [];
+                foreach ($processor->getAttributes() as $attribute) {
+                    $attributes []= $tweet->$attribute;
+                }
+                $attributes []= $tweet->dbid;
+                $updateTweet->execute($attributes);
             }
 
             foreach ($data as $values) {
                 try {
-                    $createSalutation->execute(array_merge($values, [$tweet->dbid]));
+                    $createSalutation->execute(array_merge([$values], [$tweet->id]));
                 }
                 catch (\PDOException $exception) {
+                    if (!isset($exception->errorInfo[1])) {
+                        throw $exception;
+                    }
+
                     // ignore duplicate entries
-                    if ($exception->getCode() != '23000') {
+                    // TODO: fix abstraction - this is MySQL specific :(
+                    if ($exception->errorInfo[1] != 1062) {
                         throw $exception;
                     }
                 }
@@ -99,7 +103,7 @@ class Pdo implements Repository
     public function delete(Tweet ...$tweets)
     {
         foreach ($tweets as $tweet) {
-            $ids []= $tweet->id;
+            $ids []= $tweet->dbid;
         }
 
         if (empty($ids)) {
@@ -107,7 +111,7 @@ class Pdo implements Repository
         }
 
         return Tweet::withoutGlobalScopes()
-            ->whereIn('id', $ids)
+            ->whereIn('dbid', $ids)
             ->delete();
     }
 }
