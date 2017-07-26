@@ -10,11 +10,15 @@ use App\Tweet;
 class Processor implements Hydrator, Filter, Lexer
 {
     protected $hydrators = [];
+    protected $attributes;
     protected $filters = [];
     protected $lexers = [];
 
     public function addHydrators(Hydrator ...$hydrators)
     {
+        // clear cache
+        $this->attributes = null;
+
         $this->hydrators = array_merge($this->hydrators, $hydrators);
     }
 
@@ -30,13 +34,18 @@ class Processor implements Hydrator, Filter, Lexer
 
     public function getAttributes() : array
     {
+        // cache
+        if (isset($this->attributes)) {
+            return $this->attributes;
+        }
+
         $attributes = [];
 
         foreach ($this->hydrators as $hydrator) {
             $attributes = array_merge_recursive($attributes, $hydrator->getAttributes());
         }
 
-        return $attributes;
+        return $this->attributes = $attributes;
     }
 
     /**
