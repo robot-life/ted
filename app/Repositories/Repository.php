@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 interface Repository
 {
-    public function getNew(int $limit = 0) : Collection;
-    public function process(Processor $parser, Tweet ...$tweets);
+    public function insertJson(array $data, Processor $parser);
+    public function update(Processor $parser, Tweet ...$tweets);
     public function delete(Tweet ...$tweets);
 }

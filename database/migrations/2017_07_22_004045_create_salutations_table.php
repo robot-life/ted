@@ -23,7 +23,7 @@ class CreateSalutationsTable extends Migration
                 ->references('id')
                 ->on('tweets');
 
-            $table->unique('text', 'tweet_id');
+            $table->unique(['text', 'tweet_id']);
         });
     }
 

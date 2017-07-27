@@ -8,33 +8,79 @@ use App\Salutation;
 use Illuminate\Database\Eloquent\Collection;
 use Exception;
 use App\Parsers\Processor;
+use Redis;
 
 class Pdo implements Repository
 {
-    public function getNew(int $limit = 0) : Collection
-    {
-        if ($limit === 0) {
-            $limit = (int)config('repository.limit', '1000');
-        }
-
-        if ($limit <= 0) {
-            throw new Exception('Repository limit must be greater than zero.');
-        }
-
-        return Tweet::withoutGlobalScopes()
-            ->select([
-                'dbid',
-                'json',
-            ])
-            ->whereNull('id')
-            ->limit($limit)
-            ->get();
-    }
-
-    public function process(Processor $processor, Tweet ...$tweets)
+    public function insertJson(array $data, Processor $processor)
     {
         // all this complexity just so I can reuse a prepared statement
-        $builder = DB::table((new Tweet)->getTable())->where('dbid', '');
+        $builder = DB::table((new Tweet)->getTable());
+        $columns = array_merge(['json'], $processor->getAttributes());
+        $sql = $builder->getGrammar()
+            ->compileInsert($builder, array_flip($columns));
+        // prepare once
+        $insertTweet = DB::connection()->getPdo()->prepare($sql);
+
+        $builder = DB::table((new Salutation)->getTable());
+        $sql = $builder->getGrammar()
+            ->compileInsert($builder, [
+                'text' => null,
+                'tweet_id' => null,
+            ]);
+        // prepare once
+        $insertSalutation = DB::connection()->getPdo()->prepare($sql);
+
+        foreach ($data as $json) {
+            $tweet = new Tweet;
+            $tweet->json = $json;
+
+            // discover
+            if (!$processor->hydrate($tweet)) {
+                continue;
+            }
+
+            // filter
+            if ($processor->filters($tweet)) {
+                continue;
+            }
+
+            // reap
+            $lexes = $processor->lex($tweet);
+            if (!$lexes) {
+                continue;
+            }
+
+            // execute many
+            $attributes = [];
+            foreach ($processor->getAttributes() as $attribute) {
+                $attributes []= $tweet->$attribute;
+            }
+            $insertTweet->execute(array_merge([$json], $attributes));
+
+            foreach ($lexes as $text) {
+                try {
+                    $insertSalutation->execute([$text, $tweet->id]);
+                }
+                catch (\PDOException $exception) {
+                    if (!isset($exception->errorInfo[1])) {
+                        throw $exception;
+                    }
+
+                    // ignore duplicate entries
+                    // TODO: fix abstraction - this is MySQL specific :(
+                    if ($exception->errorInfo[1] != 1062) {
+                        throw $exception;
+                    }
+                }
+            }
+        }
+    }
+
+    public function update(Processor $processor, Tweet ...$tweets)
+    {
+        // all this complexity just so I can reuse a prepared statement
+        $builder = DB::table((new Tweet)->getTable())->where('id', '');
         $sql = $builder->getGrammar()
             ->compileUpdate($builder, array_flip($processor->getAttributes()));
         // prepare once
@@ -47,7 +93,7 @@ class Pdo implements Repository
                 'tweet_id' => null,
             ]);
         // prepare once
-        $createSalutation = DB::connection()->getPdo()->prepare($sql);
+        $insertSalutation = DB::connection()->getPdo()->prepare($sql);
 
         $trash = [];
         foreach ($tweets as $tweet) {
@@ -82,7 +128,7 @@ class Pdo implements Repository
                     dd($data);
                 }
                 try {
-                    $createSalutation->execute([$value, $tweet->id]);
+                    $insertSalutation->execute([$value, $tweet->id]);
                 }
                 catch (\PDOException $exception) {
                     if (!isset($exception->errorInfo[1])) {
@@ -106,15 +152,13 @@ class Pdo implements Repository
     public function delete(Tweet ...$tweets)
     {
         foreach ($tweets as $tweet) {
-            $ids []= $tweet->dbid;
+            $ids []= $tweet->id;
         }
 
         if (empty($ids)) {
             return;
         }
 
-        return Tweet::withoutGlobalScopes()
-            ->whereIn('dbid', $ids)
-            ->delete();
+        return Tweet::whereIn('id', $ids)->delete();
     }
 }

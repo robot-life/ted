@@ -8,6 +8,7 @@ use App\Repositories\Pdo;
 use App\Parsers\Hydrators\Extractor;
 use App\Parsers\Filters\Retweet;
 use App\Parsers\Lexers\Regex;
+use Redis;
 
 class parse extends Command
 {
@@ -42,6 +43,9 @@ class parse extends Command
      */
     public function handle()
     {
+        $redisList = 'tweets';
+        $limit = (int)config('repository.limit', 5000);
+
         $repository = new Pdo;
         $parcy = new Processor;
 
@@ -50,21 +54,30 @@ class parse extends Command
         $parcy->addLexers(new Regex);
 
         while (true) {
-            $this->line('');
-            $this->info('parsing');
+            Redis::multi();
+            Redis::llen($redisList);
+            Redis::lrange($redisList, 0, $limit);
+            Redis::del($redisList);
+            $result = Redis::exec();
 
-            $tweets = $repository->getNew();
-            $repository->process($parcy, ...$tweets);
+            $this->info(date('c')." parsing $result[0] tweets");
+            $repository->insertJson($result[1], $parcy);
 
-            $sleep = 30;
-            $bar = $this->output->createProgressBar($sleep);
-            $this->info('sleeping');
-            while ($sleep--) {
-                $bar->advance();
-                sleep(1);
+            if ($result[0] < 100) {
+                $this->sleep();
+                continue;
             }
-            $bar->finish();
-            sleep(1);
         }
+    }
+
+    protected function sleep(int $sleep = 60)
+    {
+        if ($sleep < 1) {
+            return;
+        }
+
+        $this->info(date('c')." sleeping $sleep seconds");
+
+        sleep($sleep);
     }
 }
