@@ -3,27 +3,10 @@
 namespace App;
 
 use OauthPhirehose;
-use DB;
+use Redis;
 
 class Streamer extends OauthPhirehose
 {
-    protected $statement;
-
-    public function __construct(...$args)
-    {
-        parent::__construct(...$args);
-        $this->setStatment();
-    }
-
-    public function setStatment(string $sql = null)
-    {
-        if (is_null($sql)) {
-            $sql = 'INSERT INTO tweets (json) VALUES (?)';
-        }
-
-        $this->statement = DB::connection()->getPdo()->prepare($sql);
-    }
-
     /**
      * Enqueue each status
      *
@@ -31,6 +14,6 @@ class Streamer extends OauthPhirehose
      */
     public function enqueueStatus($status)
     {
-        $this->statement->execute([$status]);
+        Redis::lpush('tweets', $status);
     }
 }
