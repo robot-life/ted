@@ -1,7 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use  App\Parsers\Lexers\Regex;
+use App\Parsers\Lexers\Regex;
 use App\Tweet;
 
 class RegexTest extends TestCase
