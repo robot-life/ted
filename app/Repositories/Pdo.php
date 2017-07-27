@@ -12,17 +12,28 @@ use Redis;
 
 class Pdo implements Repository
 {
-    public function insertJson(array $data, Processor $processor)
+    /**
+     * @return array Returns count of rows inserted indexed by table name.
+     */
+    public function insertJson(array $data, Processor $processor) : array
     {
+        $tweetTable = (new Tweet)->getTable();
+        $salutationTable = (new Salutation)->getTable();
+
+        $count = [
+            $tweetTable => 0,
+            $salutationTable => 0,
+        ];
+
         // all this complexity just so I can reuse a prepared statement
-        $builder = DB::table((new Tweet)->getTable());
+        $builder = DB::table($tweetTable);
         $columns = array_merge(['json'], $processor->getAttributes());
         $sql = $builder->getGrammar()
             ->compileInsert($builder, array_flip($columns));
         // prepare once
         $insertTweet = DB::connection()->getPdo()->prepare($sql);
 
-        $builder = DB::table((new Salutation)->getTable());
+        $builder = DB::table($salutationTable);
         $sql = $builder->getGrammar()
             ->compileInsert($builder, [
                 'text' => null,
@@ -57,10 +68,12 @@ class Pdo implements Repository
                 $attributes []= $tweet->$attribute;
             }
             $insertTweet->execute(array_merge([$json], $attributes));
+            $count[$tweetTable]++;
 
             foreach ($lexes as $text) {
                 try {
                     $insertSalutation->execute([$text, $tweet->id]);
+                    $count[$salutationTable]++;
                 }
                 catch (\PDOException $exception) {
                     if (!isset($exception->errorInfo[1])) {
@@ -75,6 +88,8 @@ class Pdo implements Repository
                 }
             }
         }
+
+        return $count;
     }
 
     public function update(Processor $processor, Tweet ...$tweets)

@@ -61,7 +61,8 @@ class parse extends Command
             $result = Redis::exec();
 
             $this->info(date('c')." parsing $result[0] tweets");
-            $repository->insertJson($result[1], $parcy);
+            $count = $repository->insertJson($result[1], $parcy);
+            $this->table(array_keys($count), [$count]);
 
             if ($result[0] < 100) {
                 $this->sleep();
