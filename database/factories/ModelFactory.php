@@ -25,12 +25,15 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
 
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
 $factory->define(App\Tweet::class, function (Faker\Generator $faker) {
-    $tweet_id = str_random(22);
-
-    return [
-        'json' => json_encode(['id' => $tweet_id]),
-        'id' => $tweet_id,
+    $tweet = [
+        'id' => $faker->unique()->randomNumber(),
+        'text' => $faker->sentence(),
+        'created_at' => (string) new Carbon\Carbon,
     ];
+
+    $tweet['json'] = json_encode($tweet);
+
+    return $tweet;
 });
 
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
