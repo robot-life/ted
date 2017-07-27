@@ -23,16 +23,6 @@ class stream extends Command
     protected $description = 'Gets new tweets from Streaming API';
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Execute the console command.
      *
      * @return mixed
@@ -44,6 +34,21 @@ class stream extends Command
         $sc->consumerSecret = config('streamer.consumer_secret');
         $sc->setTrack(config('streamer.track'));
         $sc->setLang(config('streamer.language'));
+
+        $sc->setLogger(new class($this) {
+            protected $command;
+
+            public function __construct(Command $command)
+            {
+                $this->command = $command;
+            }
+
+            public function log($msg)
+            {
+                $this->command->info($msg);
+            }
+        });
+
         $sc->consume();
     }
 }
