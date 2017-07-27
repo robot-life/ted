@@ -64,7 +64,7 @@ class parse extends Command
             $count = $repository->insertJson($result[1], $parcy);
             $this->table(array_keys($count), [$count]);
 
-            if ($result[0] < 100) {
+            if ($result[0] < 500) {
                 $this->sleep();
                 continue;
             }
