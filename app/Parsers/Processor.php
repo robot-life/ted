@@ -75,14 +75,17 @@ class Processor implements Hydrator, Filter, Lexer
         return false;
     }
 
-    public function lex(Tweet $tweet)
+    /**
+    * @return array of substrings from statement
+     */
+    public function lex(Tweet $tweet) : array
     {
+        $results = [];
+
         foreach ($this->lexers as $lexer) {
-            if (false !== ($response = $lexer->lex($tweet))) {
-                $results []= $response;
-            }
+            $results = array_merge($results, $lexer->lex($tweet));
         }
 
-        return $results ?? false;
+        return $results;
     }
 }

@@ -62,7 +62,7 @@ class Pdo implements Repository
 
             // reap
             $data = $processor->lex($tweet);
-            if (false === $data) {
+            if (!$data) {
                 $trash []= $tweet;
                 continue;
             }
@@ -77,9 +77,12 @@ class Pdo implements Repository
                 $updateTweet->execute($attributes);
             }
 
-            foreach ($data as $values) {
+            foreach ($data as $value) {
+                if (empty($value)) {
+                    dd($data);
+                }
                 try {
-                    $createSalutation->execute(array_merge([$values], [$tweet->id]));
+                    $createSalutation->execute([$value, $tweet->id]);
                 }
                 catch (\PDOException $exception) {
                     if (!isset($exception->errorInfo[1])) {

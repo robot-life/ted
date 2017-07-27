@@ -7,8 +7,7 @@ use App\Tweet;
 interface Lexer
 {
     /**
-     * @return mixed
-     *   substring from statement or FALSE on failure
+    * @return array of substrings from statement
      */
-    public function lex(Tweet $tweet);
+    public function lex(Tweet $tweet) : array;
 }

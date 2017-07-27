@@ -1,7 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use App\Lexers\Regex;
+use  App\Parsers\Lexers\Regex;
 use App\Tweet;
 
 class RegexTest extends TestCase
@@ -56,31 +56,31 @@ class RegexTest extends TestCase
             ],
             [
                 "In general, I think it's a bad idea.",
-                false,
+                null,
             ],
             [
                 "What do you think about it in general?",
-                false,
+                null,
             ],
             [
                 "The question is who poisoned the GENERAL at Bomas & was he driven to the hospital or taken from his House?",
-                false,
+                null,
             ],
             [
                 "Still struggling to understand the death of General Joseph Nkaissery.",
-                false,
+                null,
             ],
             [
                 "Mosul victory announcement 'imminent', US Brigadier General Sofge tells me from Baghdad",
-                false,
+                null,
             ],
             [
                 "He's STILL a celebrated general....just not in DC, Hollywood or the elite media.",
-                false,
+                null,
             ],
             [
                 "Mosul victory announcement 'imminent': US general - Yahoo Singapore News",
-                false,
+                null,
             ],
         ];
     }
@@ -91,9 +91,9 @@ class RegexTest extends TestCase
     public function test_returns_salutation($statement, $expected)
     {
         $tweet = new Tweet;
-        $tweet->tweet = $statement;
+        $tweet->text = $statement;
 
-        $actual = (new Regex)->lex($tweet);
+        $actual = (new Regex)->lex($tweet)[0] ?? null;
 
         $this->assertSame($expected, $actual);
     }
