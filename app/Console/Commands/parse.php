@@ -7,6 +7,7 @@ use App\Parsers\Processor;
 use App\Repositories\Pdo;
 use App\Parsers\Hydrators\Extractor;
 use App\Parsers\Filters\Retweet;
+use App\Parsers\Filters\Hyperlink;
 use App\Parsers\Lexers\Regex;
 use Redis;
 
@@ -50,7 +51,7 @@ class parse extends Command
         $parcy = new Processor;
 
         $parcy->addHydrators(new Extractor);
-        $parcy->addFilters(new Retweet);
+        $parcy->addFilters(new Retweet, new Hyperlink);
         $parcy->addLexers(new Regex);
 
         while (true) {
