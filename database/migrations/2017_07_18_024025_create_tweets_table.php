@@ -21,6 +21,8 @@ class CreateTweetsTable extends Migration
             $table->text('json');
             $table->dateTimeTz('created_at');
             $table->text('text');
+
+            $table->decimal('sentiment', 15, 14);
         });
     }
 
